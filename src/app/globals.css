@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/*
+ * WishList design tokens: "Soft UI Evolution" (ui-ux-pro-max), trust blue + profit green.
+ * Dark is the default; light follows the system or the toggle. Components use only these
+ * semantic tokens, never raw hex.
+ */
+:root {
+  color-scheme: dark;
+  --bg: #0b1222;
+  --surface: #121b2f;
+  --surface-2: #1a2540;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.16);
+  --fg: #f1f5f9;
+  --muted: #94a3b8;
+  --primary: #2563eb; /* button fill: 5.2:1 with white */
+  --primary-hover: #1d4ed8;
+  --link: #7aa7ff;
+  --down: #34d399; /* price went down: good */
+  --down-bg: rgba(52, 211, 153, 0.12);
+  --up: #f87171; /* price went up: bad */
+  --up-bg: rgba(248, 113, 113, 0.12);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.12);
+  --forecast: #fb923c;
+  --chart: #60a5fa;
+  --ring: #7aa7ff;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 30px -14px rgba(0, 0, 0, 0.6);
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f5fa;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --line: #e2e8f0;
+  --line-strong: #cbd5e1;
+  --fg: #0f172a;
+  --muted: #475569;
+  --primary: #1e40af;
+  --primary-hover: #1e3a8a;
+  --link: #1d4ed8;
+  --down: #047857;
+  --down-bg: #ecfdf5;
+  --up: #b91c1c;
+  --up-bg: #fef2f2;
+  --warn: #a16207;
+  --warn-bg: #fefce8;
+  --forecast: #c2410c;
+  --chart: #2563eb;
+  --ring: #1d4ed8;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 10px 30px -16px rgba(15, 23, 42, 0.18);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-link: var(--link);
+  --color-down: var(--down);
+  --color-down-bg: var(--down-bg);
+  --color-up: var(--up);
+  --color-up-bg: var(--up-bg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
+  --color-forecast: var(--forecast);
+  --color-chart: var(--chart);
+  --font-sans: var(--font-nunito);
+  --font-display: var(--font-rubik);
+  --shadow-soft: var(--shadow);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-nunito), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@utility card {
+  @apply rounded-2xl border border-line bg-surface shadow-soft;
+}
+@utility btn {
+  @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-primary {
+  @apply btn bg-primary text-white hover:bg-primary-hover;
+}
+@utility btn-ghost {
+  @apply btn border border-line bg-surface-2 text-fg hover:border-line-strong;
+}
+@utility btn-danger {
+  @apply btn border border-line bg-surface-2 text-up hover:bg-up-bg;
+}
+@utility field {
+  @apply min-h-11 w-full rounded-xl border border-line-strong bg-surface-2 px-3 text-base text-fg placeholder:text-muted/70 transition-colors duration-200 focus:border-link;
+}
+@utility label {
+  @apply mb-1.5 block text-sm font-semibold text-fg;
+}
+@utility eyebrow {
+  @apply text-xs font-semibold tracking-wide text-muted uppercase;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
