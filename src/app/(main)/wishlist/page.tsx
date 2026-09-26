@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Heart } from "lucide-react";
 import { AddItemForm } from "@/components/AddItemForm";
 import { ItemCard } from "@/components/ItemCard";
-import { EmptyState, PageHeader } from "@/components/ui";
+import { Empty, PageHeader } from "@/components/ui";
 import { inr } from "@/lib/format";
 import { listItems } from "@/lib/repo";
 import type { ItemStatus } from "@/lib/types";
@@ -11,7 +10,7 @@ import type { ItemStatus } from "@/lib/types";
 export const metadata: Metadata = { title: "Wishlist" };
 
 const TABS: { id: ItemStatus; label: string }[] = [
-  { id: "wishlist", label: "Wishing" },
+  { id: "wishlist", label: "Wanted" },
   { id: "bought", label: "Bought" },
   { id: "archived", label: "Archived" },
 ];
@@ -27,41 +26,42 @@ export default async function WishlistPage({ searchParams }: PageProps<"/wishlis
   return (
     <>
       <PageHeader
+        kicker={items.length ? `${items.length} item${items.length === 1 ? "" : "s"} · ${inr(total)} ${active === "bought" ? "spent" : "in total"}` : "The catalogue"}
         title="Wishlist"
-        subtitle={
-          items.length
-            ? `${items.length} item${items.length === 1 ? "" : "s"} · ${inr(total)} ${active === "bought" ? "spent" : "total"}`
-            : "Everything you're eyeing, with prices checked daily."
-        }
-      />
-      <AddItemForm autoFocus={all.length === 0} />
+      >
+        Things you want, with the price checked every morning.
+      </PageHeader>
 
-      <nav aria-label="Filter" className="mt-8 mb-5 flex gap-1 overflow-x-auto rounded-xl bg-surface-2 p-1 sm:w-fit">
+      <div className="max-w-2xl">
+        <AddItemForm autoFocus={all.length === 0} />
+      </div>
+
+      <nav aria-label="Filter" className="mt-12 flex gap-6 border-b border-rule">
         {TABS.map((t) => (
           <Link
             key={t.id}
             href={t.id === "wishlist" ? "/wishlist" : `/wishlist?tab=${t.id}`}
             aria-current={t.id === active ? "page" : undefined}
-            className={`flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-200 sm:flex-none ${
-              t.id === active ? "bg-surface text-fg shadow-soft" : "text-muted hover:text-fg"
+            className={`relative -mb-px flex min-h-11 items-center gap-2 border-b-2 text-[15px] transition-colors duration-200 ${
+              t.id === active ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink"
             }`}
           >
             {t.label}
-            <span className="tabular text-xs text-muted">{counts[t.id]}</span>
+            <span className="tabular font-mono text-[12px] text-muted">{counts[t.id]}</span>
           </Link>
         ))}
       </nav>
 
       {items.length === 0 ? (
-        <EmptyState icon={<Heart aria-hidden className="size-6" />} title={active === "wishlist" ? "Nothing here yet" : `No ${active} items`}>
+        <Empty title={active === "wishlist" ? "Nothing wanted yet." : `Nothing ${active} yet.`}>
           {active === "wishlist"
-            ? "Paste a product link above. WishList pulls the details, starts a price history, and tells you whether to buy now or wait."
+            ? "Paste a link above. WishList reads the product, starts a price history, and tells you whether to buy or wait."
             : active === "bought"
-              ? "When you buy something from your wishlist, mark it as bought and it moves here (and into Expenses)."
-              : "Archived items stop getting price checks but keep their history."}
-        </EmptyState>
+              ? "Mark something as bought and it lands here, and in Spending."
+              : "Archived items keep their history but stop getting checked."}
+        </Empty>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-10 pt-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4">
           {items.map((item) => (
             <ItemCard key={item.id} item={item} />
           ))}

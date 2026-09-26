@@ -1,108 +1,121 @@
-import { AlertTriangle, CheckCircle2, Info, TrendingDown, TrendingUp } from "lucide-react";
 import type { ReactNode } from "react";
 import { inr } from "@/lib/format";
 
-export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: ReactNode; action?: ReactNode }) {
+/** Big editorial page title. `kicker` is the small mono line above it. */
+export function PageHeader({
+  kicker,
+  title,
+  children,
+  action,
+}: {
+  kicker?: ReactNode;
+  title: ReactNode;
+  children?: ReactNode;
+  action?: ReactNode;
+}) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4 lg:mb-8">
-      <div className="min-w-0">
-        <h1 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h1>
-        {subtitle && <p className="mt-1 text-muted">{subtitle}</p>}
+    <header className="mb-10 flex flex-wrap items-end justify-between gap-x-8 gap-y-5 sm:mb-14">
+      <div className="min-w-0 max-w-3xl">
+        {kicker && <p className="meta mb-3">{kicker}</p>}
+        <h1 className="display text-[40px] sm:text-[56px]">{title}</h1>
+        {children && <div className="mt-4 max-w-2xl text-[17px] leading-relaxed text-ink-2">{children}</div>}
       </div>
       {action}
-    </div>
+    </header>
   );
 }
 
-export function StatCard({
-  label,
-  value,
-  hint,
-  tone = "default",
+/**
+ * A spec-sheet section: numbered mono label in a narrow left column, content on the right,
+ * separated from the previous section by a hairline. Replaces boxed "cards".
+ */
+export function Section({
+  index,
+  title,
+  aside,
+  children,
+  id,
 }: {
-  label: string;
-  value: ReactNode;
-  hint?: ReactNode;
-  tone?: "default" | "down" | "up";
+  index?: string;
+  title: string;
+  aside?: ReactNode;
+  children: ReactNode;
+  id?: string;
 }) {
-  const color = tone === "down" ? "text-down" : tone === "up" ? "text-up" : "text-fg";
+  const headingId = id ?? `s-${title.toLowerCase().replace(/[^a-z]+/g, "-")}`;
   return (
-    <div className="card p-4 sm:p-5">
-      <p className="eyebrow">{label}</p>
-      <p className={`tabular mt-2 font-display text-2xl font-semibold tracking-tight ${color}`}>{value}</p>
-      {hint && <p className="mt-1 text-sm text-muted">{hint}</p>}
+    <section aria-labelledby={headingId} className="grid gap-x-10 gap-y-4 border-t border-rule py-8 sm:py-10 md:grid-cols-[180px_minmax(0,1fr)]">
+      <div>
+        <h2 id={headingId} className="meta flex gap-3 text-ink">
+          {index && <span className="text-muted">{index}</span>}
+          {title}
+        </h2>
+        {aside && <div className="mt-2 text-[13px] text-muted">{aside}</div>}
+      </div>
+      <div className="min-w-0">{children}</div>
+    </section>
+  );
+}
+
+/** A figure with a small mono label, for key numbers. No box. */
+export function Figure({ label, value, note, tone }: { label: string; value: ReactNode; note?: ReactNode; tone?: "down" | "up" }) {
+  return (
+    <div className="min-w-0">
+      <p className="meta">{label}</p>
+      <p className={`display tabular mt-2 text-[32px] sm:text-[36px] ${tone === "down" ? "text-down" : tone === "up" ? "text-up" : ""}`}>{value}</p>
+      {note && <p className="mt-1 text-[13px] text-muted">{note}</p>}
     </div>
   );
 }
 
-/** Price change badge. Direction is shown by icon + sign, not colour alone. */
-export function Delta({ from, to, size = "sm" }: { from: number | null; to: number | null; size?: "sm" | "md" }) {
+/** Price change as text: "↓ 1.8%". Direction is carried by the arrow and a word for screen readers. */
+export function Delta({ from, to, className = "" }: { from: number | null; to: number | null; className?: string }) {
   if (from == null || to == null || from === to) return null;
   const down = to < from;
   const pct = Math.abs(((to - from) / from) * 100);
-  const Icon = down ? TrendingDown : TrendingUp;
   return (
-    <span
-      className={`tabular inline-flex items-center gap-1 rounded-full font-semibold ${
-        size === "md" ? "px-2.5 py-1 text-sm" : "px-2 py-0.5 text-xs"
-      } ${down ? "bg-down-bg text-down" : "bg-up-bg text-up"}`}
-      title={`${down ? "Down" : "Up"} from ${inr(from)}`}
-    >
-      <Icon aria-hidden className="size-3.5" />
-      <span className="sr-only">{down ? "Down" : "Up"}</span>
-      {down ? "−" : "+"}
-      {pct < 10 ? pct.toFixed(1) : pct.toFixed(0)}%
+    <span className={`tabular font-mono text-[12.5px] ${down ? "text-down" : "text-up"} ${className}`} title={`${down ? "Down" : "Up"} from ${inr(from)}`}>
+      <span aria-hidden>{down ? "↓" : "↑"}</span>
+      <span className="sr-only">{down ? "down" : "up"}</span> {pct < 10 ? pct.toFixed(1) : pct.toFixed(0)}%
     </span>
   );
 }
 
-/** Tiny inline trend line, rendered on the server. */
+/** Tiny trend line, drawn in ink. */
 export function Sparkline({ values, className = "" }: { values: number[]; className?: string }) {
   if (values.length < 2) return null;
-  const w = 96;
-  const h = 28;
+  const w = 64;
+  const h = 18;
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = max - min || 1;
-  const pts = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - 2 - ((v - min) / span) * (h - 4)}`);
-  const falling = values[values.length - 1] < values[0];
+  const pts = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - 1.5 - ((v - min) / span) * (h - 3)}`);
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className={`h-7 w-24 ${className}`} aria-hidden preserveAspectRatio="none">
-      <polyline
-        points={pts.join(" ")}
-        fill="none"
-        strokeWidth="1.75"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        className={falling ? "stroke-down" : "stroke-chart"}
-        vectorEffect="non-scaling-stroke"
-      />
+    <svg viewBox={`0 0 ${w} ${h}`} className={`h-[18px] w-16 ${className}`} aria-hidden preserveAspectRatio="none">
+      <polyline points={pts.join(" ")} fill="none" strokeWidth="1.25" className="stroke-ink-2" vectorEffect="non-scaling-stroke" />
     </svg>
   );
 }
 
+/** Inline message. A left rule and a tinted wash, never a floating box. */
 export function Notice({ tone = "info", children }: { tone?: "info" | "warn" | "success"; children: ReactNode }) {
   const styles = {
-    info: "border-link/30 bg-surface-2 text-fg",
-    warn: "border-warn/30 bg-warn-bg text-fg",
-    success: "border-down/30 bg-down-bg text-fg",
+    info: "border-ink bg-paper/60",
+    warn: "border-warn bg-warn-soft",
+    success: "border-down bg-down-soft",
   }[tone];
-  const Icon = tone === "warn" ? AlertTriangle : tone === "success" ? CheckCircle2 : Info;
-  const iconColor = tone === "warn" ? "text-warn" : tone === "success" ? "text-down" : "text-link";
   return (
-    <div role={tone === "warn" ? "alert" : "status"} className={`flex gap-3 rounded-xl border p-4 text-sm ${styles}`}>
-      <Icon aria-hidden className={`mt-0.5 size-4 shrink-0 ${iconColor}`} />
-      <div className="min-w-0 space-y-1">{children}</div>
+    <div role={tone === "warn" ? "alert" : "status"} className={`border-l-2 px-4 py-3 text-[14px] leading-relaxed ${styles}`}>
+      {children}
     </div>
   );
 }
 
-export function EmptyState({ icon, title, children }: { icon: ReactNode; title: string; children?: ReactNode }) {
+export function Empty({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="card flex flex-col items-center px-6 py-12 text-center">
-      <div className="mb-4 grid size-12 place-items-center rounded-2xl bg-surface-2 text-link">{icon}</div>
-      <h2 className="font-display text-lg font-semibold">{title}</h2>
-      {children && <div className="mt-2 max-w-md text-sm text-muted">{children}</div>}
+    <div className="border-t border-rule py-16 text-center sm:py-24">
+      <p className="display text-[28px] sm:text-[32px]">{title}</p>
+      {children && <div className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-ink-2">{children}</div>}
     </div>
   );
 }

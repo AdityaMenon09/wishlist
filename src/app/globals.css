@@ -1,121 +1,163 @@
 @import "tailwindcss";
 
 /*
- * WishList design tokens: "Soft UI Evolution" (ui-ux-pro-max), trust blue + profit green.
- * Dark is the default; light follows the system or the toggle. Components use only these
- * semantic tokens, never raw hex.
+ * WishList — "paper catalogue".
+ * References (Refero Styles): Monarch (warm linen canvas, warm ink, one rationed accent,
+ * editorial serif with tight tracking, pill buttons) and teenage engineering (the product
+ * photo is the card, hairline rules instead of boxes, catalogue numbering, quiet mono meta).
+ * No drop shadows, no gradients. Structure comes from rules and type, not containers.
  */
 :root {
-  color-scheme: dark;
-  --bg: #0b1222;
-  --surface: #121b2f;
-  --surface-2: #1a2540;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.16);
-  --fg: #f1f5f9;
-  --muted: #94a3b8;
-  --primary: #2563eb; /* button fill: 5.2:1 with white */
-  --primary-hover: #1d4ed8;
-  --link: #7aa7ff;
-  --down: #34d399; /* price went down: good */
-  --down-bg: rgba(52, 211, 153, 0.12);
-  --up: #f87171; /* price went up: bad */
-  --up-bg: rgba(248, 113, 113, 0.12);
-  --warn: #fbbf24;
-  --warn-bg: rgba(251, 191, 36, 0.12);
-  --forecast: #fb923c;
-  --chart: #60a5fa;
-  --ring: #7aa7ff;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 10px 30px -14px rgba(0, 0, 0, 0.6);
+  color-scheme: light;
+  --bg: #f2efea; /* linen */
+  --paper: #ffffff; /* inputs, image plates */
+  --plate: #faf8f4; /* image plate: store photos multiply into it */
+  --ink: #1d1b18;
+  --ink-2: #57534c;
+  --muted: #6f6a62; /* 4.9:1 on linen, safe for small meta */
+  --rule: #ddd8d0;
+  --rule-strong: #c6c0b6;
+  --accent: #c2410c; /* burnt vermilion: rationed */
+  --accent-soft: rgba(194, 65, 12, 0.1);
+  --down: #2f7d4f; /* price fell: good */
+  --up: #b3261e; /* price rose: bad */
+  --warn: #8a5a00;
+  --warn-soft: #f6ead0;
+  --down-soft: #e3efe6;
+  --chart: #1d1b18;
+  --forecast: #c2410c;
 }
 
-:root[data-theme="light"] {
-  color-scheme: light;
-  --bg: #f3f5fa;
-  --surface: #ffffff;
-  --surface-2: #eef2f8;
-  --line: #e2e8f0;
-  --line-strong: #cbd5e1;
-  --fg: #0f172a;
-  --muted: #475569;
-  --primary: #1e40af;
-  --primary-hover: #1e3a8a;
-  --link: #1d4ed8;
-  --down: #047857;
-  --down-bg: #ecfdf5;
-  --up: #b91c1c;
-  --up-bg: #fef2f2;
-  --warn: #a16207;
-  --warn-bg: #fefce8;
-  --forecast: #c2410c;
-  --chart: #2563eb;
-  --ring: #1d4ed8;
-  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 10px 30px -16px rgba(15, 23, 42, 0.18);
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #151412;
+    --paper: #1e1c19;
+    --plate: #ece8e1;
+    --ink: #eee9e1;
+    --ink-2: #b8b2a8;
+    --muted: #9a9489;
+    --rule: #2e2b27;
+    --rule-strong: #45413b;
+    --accent: #f08a5d;
+    --accent-soft: rgba(240, 138, 93, 0.12);
+    --down: #74c796;
+    --up: #f2877d;
+    --warn: #e2b458;
+    --warn-soft: rgba(226, 180, 88, 0.12);
+    --down-soft: rgba(116, 199, 150, 0.12);
+    --chart: #eee9e1;
+    --forecast: #f08a5d;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #151412;
+  --paper: #1e1c19;
+  --plate: #ece8e1;
+  --ink: #eee9e1;
+  --ink-2: #b8b2a8;
+  --muted: #9a9489;
+  --rule: #2e2b27;
+  --rule-strong: #45413b;
+  --accent: #f08a5d;
+  --accent-soft: rgba(240, 138, 93, 0.12);
+  --down: #74c796;
+  --up: #f2877d;
+  --warn: #e2b458;
+  --warn-soft: rgba(226, 180, 88, 0.12);
+  --down-soft: rgba(116, 199, 150, 0.12);
+  --chart: #eee9e1;
+  --forecast: #f08a5d;
 }
 
 @theme inline {
   --color-bg: var(--bg);
-  --color-surface: var(--surface);
-  --color-surface-2: var(--surface-2);
-  --color-line: var(--line);
-  --color-line-strong: var(--line-strong);
-  --color-fg: var(--fg);
+  --color-paper: var(--paper);
+  --color-plate: var(--plate);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
   --color-muted: var(--muted);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-link: var(--link);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
   --color-down: var(--down);
-  --color-down-bg: var(--down-bg);
+  --color-down-soft: var(--down-soft);
   --color-up: var(--up);
-  --color-up-bg: var(--up-bg);
   --color-warn: var(--warn);
-  --color-warn-bg: var(--warn-bg);
-  --color-forecast: var(--forecast);
+  --color-warn-soft: var(--warn-soft);
   --color-chart: var(--chart);
-  --font-sans: var(--font-nunito);
-  --font-display: var(--font-rubik);
-  --shadow-soft: var(--shadow);
+  --color-forecast: var(--forecast);
+  --font-sans: var(--font-instrument);
+  --font-serif: var(--font-fraunces);
+  --font-mono: var(--font-plex-mono);
 }
 
 body {
   background: var(--bg);
-  color: var(--fg);
-  font-family: var(--font-nunito), system-ui, sans-serif;
+  color: var(--ink);
+  font-family: var(--font-instrument), system-ui, sans-serif;
+  font-size: 15px;
+  letter-spacing: -0.005em;
   -webkit-tap-highlight-color: transparent;
 }
 
-@utility card {
-  @apply rounded-2xl border border-line bg-surface shadow-soft;
+::selection {
+  background: var(--accent-soft);
 }
+
+/* Editorial serif: light weight, tight tracking (Monarch's signature move). */
+@utility display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-weight: 360;
+  font-variation-settings: "opsz" 96, "SOFT" 30;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+/* Catalogue meta: tiny mono caps, e.g. "No. 004 — Flipkart". */
+@utility meta {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 11.5px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 @utility btn {
-  @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-[background-color,border-color,opacity] duration-200 disabled:cursor-not-allowed disabled:opacity-50;
 }
 @utility btn-primary {
-  @apply btn bg-primary text-white hover:bg-primary-hover;
+  @apply btn bg-ink text-bg hover:opacity-85;
 }
-@utility btn-ghost {
-  @apply btn border border-line bg-surface-2 text-fg hover:border-line-strong;
+@utility btn-outline {
+  @apply btn border border-rule-strong text-ink hover:border-ink;
 }
-@utility btn-danger {
-  @apply btn border border-line bg-surface-2 text-up hover:bg-up-bg;
+@utility btn-text {
+  @apply inline-flex min-h-11 cursor-pointer items-center gap-1.5 text-[15px] text-ink underline decoration-rule-strong underline-offset-4 transition-colors duration-200 hover:decoration-ink disabled:cursor-not-allowed disabled:opacity-50;
 }
 @utility field {
-  @apply min-h-11 w-full rounded-xl border border-line-strong bg-surface-2 px-3 text-base text-fg placeholder:text-muted/70 transition-colors duration-200 focus:border-link;
+  @apply min-h-11 w-full rounded-lg border border-rule-strong bg-paper px-3 text-base text-ink placeholder:text-muted transition-colors duration-200 focus:border-ink;
 }
 @utility label {
-  @apply mb-1.5 block text-sm font-semibold text-fg;
+  @apply mb-1.5 block text-[13px] font-medium text-ink-2;
 }
-@utility eyebrow {
-  @apply text-xs font-semibold tracking-wide text-muted uppercase;
+@utility tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 :focus-visible {
-  outline: 2px solid var(--ring);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-.tabular {
-  font-variant-numeric: tabular-nums;
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

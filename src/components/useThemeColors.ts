@@ -2,27 +2,31 @@
 
 import { useMemo, useSyncExternalStore } from "react";
 
-const KEYS = ["chart", "forecast", "down", "up", "muted", "line", "fg", "surface", "surface-2", "link"] as const;
+const KEYS = ["chart", "forecast", "down", "up", "muted", "rule", "ink", "paper", "bg"] as const;
 type Colors = Record<(typeof KEYS)[number], string>;
 
 const FALLBACK: Colors = {
-  chart: "#60a5fa",
-  forecast: "#fb923c",
-  down: "#34d399",
-  up: "#f87171",
-  muted: "#94a3b8",
-  line: "rgba(255,255,255,0.08)",
-  fg: "#f1f5f9",
-  surface: "#121b2f",
-  "surface-2": "#1a2540",
-  link: "#7aa7ff",
+  chart: "#1d1b18",
+  forecast: "#c2410c",
+  down: "#2f7d4f",
+  up: "#b3261e",
+  muted: "#6f6a62",
+  rule: "#ddd8d0",
+  ink: "#1d1b18",
+  paper: "#ffffff",
+  bg: "#f2efea",
 };
 const FALLBACK_KEY = JSON.stringify(FALLBACK);
 
 function subscribe(cb: () => void) {
   const obs = new MutationObserver(cb);
   obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  return () => obs.disconnect();
+  const mq = matchMedia("(prefers-color-scheme: dark)");
+  mq.addEventListener("change", cb);
+  return () => {
+    obs.disconnect();
+    mq.removeEventListener("change", cb);
+  };
 }
 
 // Snapshots must be stable between calls, so compare as a string.

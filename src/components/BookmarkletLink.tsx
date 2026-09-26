@@ -1,6 +1,5 @@
 "use client";
 
-import { Bookmark, Check, Copy } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 /**
@@ -15,18 +14,14 @@ export function BookmarkletLink({ href }: { href: string }) {
   }, [href]);
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <a
-        ref={ref}
-        onClick={(e) => e.preventDefault()}
-        className="btn-primary cursor-grab active:cursor-grabbing"
-        title="Drag me to your bookmarks bar"
-      >
-        <Bookmark aria-hidden className="size-4" /> + WishList
+    <div className="flex flex-wrap items-center gap-4">
+      <a ref={ref} onClick={(e) => e.preventDefault()} className="btn-primary cursor-grab active:cursor-grabbing" title="Drag me to your bookmarks bar">
+        + WishList
       </a>
+      <span className="meta">← drag to bookmarks bar</span>
       <button
         type="button"
-        className="btn-ghost"
+        className="btn-text"
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(href);
@@ -37,8 +32,7 @@ export function BookmarkletLink({ href }: { href: string }) {
           }
         }}
       >
-        {copied ? <Check aria-hidden className="size-4 text-down" /> : <Copy aria-hidden className="size-4" />}
-        {copied ? "Copied" : "Copy code (for phones)"}
+        {copied ? "Copied" : "Copy code"}
       </button>
     </div>
   );

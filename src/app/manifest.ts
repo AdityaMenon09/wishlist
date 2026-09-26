@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Personal wishlist, price tracker and expense log.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0b1222",
-    theme_color: "#0b1222",
+    background_color: "#f2efea",
+    theme_color: "#f2efea",
     icons: [
       { src: "/icons/192", sizes: "192x192", type: "image/png" },
       { src: "/icons/512", sizes: "512x512", type: "image/png" },

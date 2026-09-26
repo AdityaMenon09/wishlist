@@ -1,6 +1,5 @@
 "use client";
 
-import { Eye, EyeOff } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import { FormMessage, SubmitButton } from "@/components/client-ui";
 import { login, type FormState } from "@/lib/actions";
@@ -19,30 +18,25 @@ export function LoginForm() {
   }, [state]);
 
   return (
-    <form action={action} className="card space-y-4 p-5">
+    <form action={action} className="space-y-5">
       <div>
-        <label htmlFor="password" className="label">
-          Password
-        </label>
-        <div className="relative">
-          <input
-            id="password"
-            name="password"
-            type={show ? "text" : "password"}
-            autoComplete="current-password"
-            autoFocus
-            required
-            className="field pr-12"
-          />
-          <button
-            type="button"
-            onClick={() => setShow((s) => !s)}
-            className="absolute top-1/2 right-1 grid size-10 -translate-y-1/2 cursor-pointer place-items-center rounded-lg text-muted hover:text-fg"
-            aria-label={show ? "Hide password" : "Show password"}
-          >
-            {show ? <EyeOff aria-hidden className="size-4" /> : <Eye aria-hidden className="size-4" />}
+        <div className="flex items-baseline justify-between">
+          <label htmlFor="password" className="label">
+            Password
+          </label>
+          <button type="button" onClick={() => setShow((s) => !s)} className="meta min-h-8 cursor-pointer hover:text-ink">
+            {show ? "hide" : "show"}
           </button>
         </div>
+        <input
+          id="password"
+          name="password"
+          type={show ? "text" : "password"}
+          autoComplete="current-password"
+          autoFocus
+          required
+          className="field"
+        />
       </div>
       <SubmitButton className="btn-primary w-full" pendingText="Signing in…">
         Sign in

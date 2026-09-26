@@ -1,43 +1,43 @@
 "use client";
 
-import { Link2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { addItem } from "@/lib/actions";
 import { FormMessage, SubmitButton, useFormAction } from "./client-ui";
 
+/** One quiet line: paste, press enter. */
 export function AddItemForm({ autoFocus = false }: { autoFocus?: boolean }) {
   const { state, onSubmit, pending } = useFormAction(addItem);
   return (
-    <form onSubmit={onSubmit} className="card p-4 sm:p-5">
-      <label htmlFor="url" className="label">
-        Add a product
+    <form onSubmit={onSubmit}>
+      <label htmlFor="url" className="sr-only">
+        Product link
       </label>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
-          <Link2 aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" />
-          <input
-            id="url"
-            name="url"
-            type="url"
-            inputMode="url"
-            required
-            autoFocus={autoFocus}
-            placeholder="https://www.amazon.in/dp/…"
-            className="field pl-9"
-            aria-describedby="url-help"
-          />
-        </div>
-        <SubmitButton pending={pending} pendingText="Fetching…">
-          Track it
+      <div className="flex items-center gap-2 rounded-full border border-rule-strong bg-paper py-1.5 pr-1.5 pl-5 transition-colors duration-200 focus-within:border-ink">
+        <input
+          id="url"
+          name="url"
+          type="url"
+          inputMode="url"
+          required
+          autoFocus={autoFocus}
+          placeholder="Paste a product link from any store"
+          className="min-h-10 min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-muted focus:outline-none"
+          aria-describedby="url-help"
+        />
+        <SubmitButton pending={pending} pendingText="Reading…" className="btn-primary min-h-10 px-4">
+          <span className="hidden sm:inline">Track</span>
+          <ArrowRight aria-hidden className="size-4" />
+          <span className="sr-only sm:hidden">Track</span>
         </SubmitButton>
       </div>
-      <p id="url-help" className="mt-2 text-sm text-muted">
-        Paste a link from Amazon, Flipkart, Myntra or any store. If the store blocks the check, use the{" "}
-        <a href="/setup" className="font-semibold text-link underline-offset-2 hover:underline">
+      <p id="url-help" className="mt-3 pl-5 text-[13px] text-muted">
+        Store blocking it? Use the{" "}
+        <a href="/setup" className="text-ink underline decoration-rule-strong underline-offset-4 hover:decoration-ink">
           bookmarklet
         </a>{" "}
         on the product page instead.
       </p>
-      <div className="mt-2">
+      <div className="mt-2 pl-5" aria-live="polite">
         <FormMessage state={state} />
       </div>
     </form>

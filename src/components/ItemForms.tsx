@@ -1,9 +1,9 @@
 "use client";
 
-import { Archive, ArchiveRestore, Loader2, RefreshCw, Search, ShoppingBag, Trash2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import type { FormState } from "@/lib/actions";
-import { PRODUCT_CATEGORIES, CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, PRODUCT_CATEGORIES } from "@/lib/categories";
 import type { Item } from "@/lib/types";
 import { FormMessage, SubmitButton, useFormAction } from "./client-ui";
 
@@ -13,20 +13,15 @@ export function RefreshButton({ action }: { action: () => Promise<FormState> }) 
   const [pending, start] = useTransition();
   const [state, setState] = useState<FormState>(null);
   return (
-    <div className="flex flex-col gap-1">
-      <button
-        type="button"
-        className="btn-ghost"
-        disabled={pending}
-        onClick={() => start(async () => setState(await action()))}
-      >
-        {pending ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <RefreshCw aria-hidden className="size-4" />}
+    <span className="inline-flex flex-col">
+      <button type="button" className="btn-text" disabled={pending} onClick={() => start(async () => setState(await action()))}>
+        {pending && <Loader2 aria-hidden className="size-3.5 animate-spin" />}
         {pending ? "Checking…" : "Check price now"}
       </button>
-      <div aria-live="polite">
+      <span aria-live="polite">
         <FormMessage state={state} />
-      </div>
-    </div>
+      </span>
+    </span>
   );
 }
 
@@ -35,8 +30,8 @@ export function CompareButton({ action, label }: { action: () => Promise<FormSta
   const [state, setState] = useState<FormState>(null);
   return (
     <div className="flex flex-col gap-2">
-      <button type="button" className="btn-primary w-fit" disabled={pending} onClick={() => start(async () => setState(await action()))}>
-        {pending ? <Loader2 aria-hidden className="size-4 animate-spin" /> : <Search aria-hidden className="size-4" />}
+      <button type="button" className="btn-outline w-fit" disabled={pending} onClick={() => start(async () => setState(await action()))}>
+        {pending && <Loader2 aria-hidden className="size-4 animate-spin" />}
         {pending ? "Searching stores…" : label}
       </button>
       <FormMessage state={state?.error ? state : null} />
@@ -53,12 +48,12 @@ export function ManualPriceForm({ action }: { action: BoundAction }) {
   return (
     <form ref={ref} onSubmit={onSubmit} className="flex flex-col gap-2">
       <label htmlFor="manual-price" className="label">
-        Saw a different price? Record it
+        Seen a different price? Log it
       </label>
       <div className="flex gap-2">
-        <input id="manual-price" name="price" inputMode="decimal" placeholder="e.g. 1499" className="field max-w-40" required />
-        <SubmitButton className="btn-ghost" pending={pending} pendingText="Saving…">
-          Add price
+        <input id="manual-price" name="price" inputMode="decimal" placeholder="₹" className="field max-w-36 rounded-full px-4" required />
+        <SubmitButton className="btn-outline" pending={pending} pendingText="Saving…">
+          Log price
         </SubmitButton>
       </div>
       <FormMessage state={state} />
@@ -72,24 +67,19 @@ export function BuyForm({ action, item, today }: { action: BoundAction; item: It
   if (!open)
     return (
       <button type="button" className="btn-primary" onClick={() => setOpen(true)}>
-        <ShoppingBag aria-hidden className="size-4" /> I bought this
+        I bought this
       </button>
     );
   return (
-    <form onSubmit={onSubmit} className="card w-full space-y-3 p-4">
-      <div className="flex items-center justify-between">
-        <p className="font-display font-semibold">Log the purchase</p>
-        <button type="button" className="btn-ghost min-h-9 px-2" aria-label="Cancel" onClick={() => setOpen(false)}>
-          <X aria-hidden className="size-4" />
-        </button>
-      </div>
-      <div className="grid gap-3 sm:grid-cols-3">
+    <form onSubmit={onSubmit} className="w-full border-t border-rule pt-5">
+      <p className="meta mb-4 text-ink">Log the purchase</p>
+      <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <label htmlFor="buy-price" className="label">Paid (₹)</label>
-          <input id="buy-price" name="price" inputMode="decimal" defaultValue={item.currentPrice ?? ""} className="field" required />
+          <input id="buy-price" name="price" inputMode="decimal" defaultValue={item.currentPrice ?? ""} className="field tabular" required />
         </div>
         <div>
-          <label htmlFor="buy-date" className="label">Date</label>
+          <label htmlFor="buy-date" className="label">On</label>
           <input id="buy-date" name="date" type="date" defaultValue={today} max={today} className="field" required />
         </div>
         <div>
@@ -101,11 +91,14 @@ export function BuyForm({ action, item, today }: { action: BoundAction; item: It
           </select>
         </div>
       </div>
-      <p className="text-sm text-muted">This moves the item to Bought and adds it to your expenses.</p>
-      <div className="flex items-center gap-3">
+      <p className="mt-3 text-[13px] text-muted">Moves it to Bought and adds it to Spending.</p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <SubmitButton pending={pending} pendingText="Saving…">
           Save purchase
         </SubmitButton>
+        <button type="button" className="btn-text" onClick={() => setOpen(false)}>
+          Cancel
+        </button>
         <FormMessage state={state} />
       </div>
     </form>
@@ -115,14 +108,14 @@ export function BuyForm({ action, item, today }: { action: BoundAction; item: It
 export function EditItemForm({ action, item }: { action: BoundAction; item: Item }) {
   const { state, onSubmit, pending } = useFormAction(action);
   return (
-    <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
+    <form onSubmit={onSubmit} className="grid gap-5 sm:grid-cols-2">
       <div className="sm:col-span-2">
         <label htmlFor="e-title" className="label">Name</label>
         <input id="e-title" name="title" defaultValue={item.title} className="field" required />
       </div>
       <div>
         <label htmlFor="e-target" className="label">Target price (₹)</label>
-        <input id="e-target" name="targetPrice" inputMode="decimal" defaultValue={item.targetPrice ?? ""} placeholder="Tell me when it drops to…" className="field" />
+        <input id="e-target" name="targetPrice" inputMode="decimal" defaultValue={item.targetPrice ?? ""} placeholder="Tell me when it hits…" className="field tabular" />
       </div>
       <div>
         <label htmlFor="e-cat" className="label">Category</label>
@@ -131,7 +124,7 @@ export function EditItemForm({ action, item }: { action: BoundAction; item: Item
             <option key={c.id} value={c.id}>{c.label}</option>
           ))}
         </select>
-        <p className="mt-1 text-xs text-muted">Decides which sale calendar the outlook uses.</p>
+        <p className="mt-1.5 text-[12.5px] text-muted">Picks which sale calendar the outlook uses.</p>
       </div>
       <div>
         <label htmlFor="e-brand" className="label">Brand</label>
@@ -139,7 +132,7 @@ export function EditItemForm({ action, item }: { action: BoundAction; item: Item
       </div>
       <div>
         <label htmlFor="e-mrp" className="label">MRP (₹)</label>
-        <input id="e-mrp" name="mrp" inputMode="decimal" defaultValue={item.mrp ?? ""} className="field" />
+        <input id="e-mrp" name="mrp" inputMode="decimal" defaultValue={item.mrp ?? ""} className="field tabular" />
       </div>
       <div className="sm:col-span-2">
         <label htmlFor="e-image" className="label">Image link</label>
@@ -147,7 +140,7 @@ export function EditItemForm({ action, item }: { action: BoundAction; item: Item
       </div>
       <div className="sm:col-span-2">
         <label htmlFor="e-notes" className="label">Notes</label>
-        <textarea id="e-notes" name="notes" rows={3} defaultValue={item.notes ?? ""} className="field py-2" placeholder="Size, colour, why you want it…" />
+        <textarea id="e-notes" name="notes" rows={3} defaultValue={item.notes ?? ""} className="field py-2.5" placeholder="Size, colour, why you want it…" />
       </div>
       <div className="flex items-center gap-3 sm:col-span-2">
         <SubmitButton pending={pending} pendingText="Saving…">
@@ -172,25 +165,25 @@ export function StatusButtons({
 }) {
   const [pending, start] = useTransition();
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap gap-x-6">
       {status === "wishlist" ? (
-        <button type="button" className="btn-ghost" disabled={pending} onClick={() => start(archive)}>
-          <Archive aria-hidden className="size-4" /> Archive
+        <button type="button" className="btn-text" disabled={pending} onClick={() => start(archive)}>
+          Archive
         </button>
       ) : (
-        <button type="button" className="btn-ghost" disabled={pending} onClick={() => start(restore)}>
-          <ArchiveRestore aria-hidden className="size-4" /> Back to wishlist
+        <button type="button" className="btn-text" disabled={pending} onClick={() => start(restore)}>
+          Move back to wishlist
         </button>
       )}
       <button
         type="button"
-        className="btn-danger"
+        className="btn-text text-up decoration-up/40 hover:decoration-up"
         disabled={pending}
         onClick={() => {
           if (confirm("Delete this item and its whole price history? Linked expenses are kept.")) start(remove);
         }}
       >
-        <Trash2 aria-hidden className="size-4" /> Delete
+        Delete
       </button>
     </div>
   );
@@ -201,12 +194,12 @@ export function DeletePointButton({ action }: { action: () => Promise<void> }) {
   return (
     <button
       type="button"
-      className="cursor-pointer rounded-lg p-2 text-muted transition-colors duration-200 hover:bg-up-bg hover:text-up"
+      className="min-h-9 cursor-pointer px-2 font-mono text-[12px] text-muted transition-colors duration-200 hover:text-up"
       aria-label="Remove this price point"
       disabled={pending}
       onClick={() => start(action)}
     >
-      <Trash2 aria-hidden className="size-3.5" />
+      remove
     </button>
   );
 }

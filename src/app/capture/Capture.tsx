@@ -46,17 +46,17 @@ export function Capture() {
 
   if (error)
     return (
-      <div role="alert" className="mt-4 space-y-4">
-        <p className="font-display text-lg font-semibold">Couldn&apos;t capture that page</p>
-        <p className="text-sm text-muted">{error}</p>
-        <Link href="/wishlist" className="btn-ghost">
+      <div role="alert" className="mt-8 space-y-4">
+        <p className="display text-[32px]">Couldn&apos;t capture that page.</p>
+        <p className="text-[15px] text-ink-2">{error}</p>
+        <Link href="/wishlist" className="btn-outline">
           Go to wishlist
         </Link>
       </div>
     );
   return (
-    <div role="status" className="mt-4 flex items-center justify-center gap-2 text-sm text-muted">
-      <Loader2 aria-hidden className="size-4 animate-spin" /> {status}
+    <div role="status" className="display mt-8 flex items-center gap-3 text-[28px]">
+      <Loader2 aria-hidden className="size-5 animate-spin text-muted" /> {status}
     </div>
   );
 }

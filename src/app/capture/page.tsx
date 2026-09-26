@@ -7,8 +7,8 @@ export const metadata: Metadata = { title: "Saving…" };
 export default function CapturePage() {
   return (
     <main className="grid min-h-dvh place-items-center px-4">
-      <div className="card w-full max-w-md p-6 text-center">
-        <Logo className="mx-auto size-10" />
+      <div className="w-full max-w-sm">
+        <Logo className="size-8" />
         <Capture />
       </div>
     </main>

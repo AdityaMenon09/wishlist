@@ -1,36 +1,45 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
 import { useSyncExternalStore } from "react";
+
+const media = () => matchMedia("(prefers-color-scheme: dark)");
 
 function subscribe(cb: () => void) {
   const obs = new MutationObserver(cb);
   obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-  return () => obs.disconnect();
+  const mq = media();
+  mq.addEventListener("change", cb);
+  return () => {
+    obs.disconnect();
+    mq.removeEventListener("change", cb);
+  };
+}
+
+/** The theme actually showing: an explicit choice, else the system setting. */
+function current(): "light" | "dark" {
+  const set = document.documentElement.dataset.theme;
+  if (set === "light" || set === "dark") return set;
+  return media().matches ? "dark" : "light";
 }
 
 export function ThemeToggle() {
-  const theme = useSyncExternalStore(
-    subscribe,
-    () => document.documentElement.dataset.theme ?? "dark",
-    () => "dark",
-  );
+  const theme = useSyncExternalStore(subscribe, current, () => "light" as const);
   const next = theme === "dark" ? "light" : "dark";
   return (
     <button
       type="button"
-      className="btn-ghost px-3"
+      className="meta min-h-11 cursor-pointer px-2 transition-colors duration-200 hover:text-ink"
       aria-label={`Switch to ${next} theme`}
       onClick={() => {
         document.documentElement.dataset.theme = next;
         try {
           localStorage.setItem("wl-theme", next);
         } catch {
-          /* private mode: theme just won't persist */
+          /* private mode: the choice just won't persist */
         }
       }}
     >
-      {theme === "dark" ? <Sun aria-hidden className="size-4" /> : <Moon aria-hidden className="size-4" />}
+      {next}
     </button>
   );
 }

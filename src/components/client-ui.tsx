@@ -1,6 +1,6 @@
 "use client";
 
-import { ImageOff, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { startTransition, useActionState, useState, type FormEvent, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import type { FormState } from "@/lib/actions";
@@ -40,11 +40,14 @@ export function SubmitButton({
   );
 }
 
-/** Store images come from many CDNs, so a plain <img> with a graceful fallback. */
+/**
+ * The product photo is the card (teenage engineering): a plain plate, no border or shadow.
+ * Store photos are shot on white, so the plate stays near-white even in dark mode.
+ */
 export function ProductImage({ src, alt, className = "" }: { src: string | null; alt: string; className?: string }) {
   const [failed, setFailed] = useState(false);
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-white ${className}`}>
+    <div className={`relative overflow-hidden bg-plate ${className}`}>
       {src && !failed ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -53,11 +56,11 @@ export function ProductImage({ src, alt, className = "" }: { src: string | null;
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
-          className="absolute inset-0 size-full object-contain p-2"
+          className="absolute inset-0 size-full object-contain p-[9%] mix-blend-multiply"
         />
       ) : (
-        <div className="absolute inset-0 grid place-items-center bg-surface-2 text-muted">
-          <ImageOff aria-hidden className="size-6" />
+        <div className="absolute inset-0 grid place-items-center">
+          <span className="meta text-[#8a857c]">No image</span>
         </div>
       )}
     </div>
@@ -68,13 +71,13 @@ export function FormMessage({ state }: { state: { error?: string; message?: stri
   if (!state) return null;
   if (state.error)
     return (
-      <p role="alert" className="text-sm font-semibold text-up">
+      <p role="alert" className="text-[14px] text-up">
         {state.error}
       </p>
     );
   if (state.message)
     return (
-      <p role="status" className="text-sm font-semibold text-down">
+      <p role="status" className="text-[14px] text-down">
         {state.message}
       </p>
     );
