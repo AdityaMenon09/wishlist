@@ -1,6 +1,9 @@
 import Link from "next/link";
+import type { CSSProperties } from "react";
 import { AddItemForm } from "@/components/AddItemForm";
-import { ProductImage } from "@/components/client-ui";
+import { ItemPhoto } from "@/components/ItemCard";
+import { Odometer } from "@/components/motion";
+import { PageTransition } from "@/components/PageTransition";
 import { SpendingChart } from "@/components/SpendingChart";
 import { Delta, Empty, PageHeader, Section } from "@/components/ui";
 import { categoryOf } from "@/lib/categories";
@@ -42,12 +45,12 @@ export default async function Home() {
       : null;
 
   return (
-    <>
+    <PageTransition>
       <PageHeader
         kicker={today()}
         title={
           <>
-            <span className="tabular">{inr(spent)}</span> spent in {monthLabel(month, "long").split(" ")[0]}.
+            <Odometer text={inr(spent)} /> spent in {monthLabel(month, "long").split(" ")[0]}.
           </>
         }
       >
@@ -78,18 +81,22 @@ export default async function Home() {
           index="01"
           title="On your list"
           aside={
-            <Link href="/wishlist" className="underline decoration-rule-strong underline-offset-4 hover:text-ink hover:decoration-ink">
+            <Link href="/wishlist" transitionTypes={["nav-section"]} className="underline decoration-rule-strong underline-offset-4 hover:text-ink hover:decoration-ink">
               See all {items.length}
             </Link>
           }
         >
           <ul className="-mt-3">
-            {shown.map((i) => {
+            {shown.map((i, n) => {
               const good = worthIt.includes(i);
               return (
-                <li key={i.id} className="border-b border-rule">
-                  <Link href={`/item/${i.id}`} className="group grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-4 py-3 sm:grid-cols-[72px_minmax(0,1fr)_auto]">
-                    <ProductImage src={i.image} alt="" className="aspect-square w-full" />
+                <li key={i.id} className="boot-rise border-b border-rule" style={{ "--i": n + 4 } as CSSProperties}>
+                  <Link
+                    href={`/item/${i.id}`}
+                    transitionTypes={["nav-forward"]}
+                    className="group grid grid-cols-[56px_minmax(0,1fr)_auto] items-center gap-4 py-3 sm:grid-cols-[72px_minmax(0,1fr)_auto]"
+                  >
+                    <ItemPhoto id={i.id} src={i.image} alt="" className="aspect-square w-full" zoom />
                     <div className="min-w-0">
                       <p className="truncate text-[15px] underline-offset-4 group-hover:underline">{i.title}</p>
                       <p className="meta mt-1">
@@ -113,7 +120,7 @@ export default async function Home() {
         index={items.length === 0 ? "01" : "02"}
         title="Spending"
         aside={
-          <Link href="/expenses" className="underline decoration-rule-strong underline-offset-4 hover:text-ink hover:decoration-ink">
+          <Link href="/expenses" transitionTypes={["nav-section"]} className="underline decoration-rule-strong underline-offset-4 hover:text-ink hover:decoration-ink">
             Open ledger
           </Link>
         }
@@ -145,6 +152,6 @@ export default async function Home() {
           </div>
         </div>
       </Section>
-    </>
+    </PageTransition>
   );
 }

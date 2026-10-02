@@ -34,7 +34,7 @@ export function SubmitButton({
   const pending = pendingProp ?? status.pending;
   return (
     <button type="submit" className={className} disabled={pending} aria-busy={pending}>
-      {pending && <Loader2 aria-hidden className="size-4 animate-spin" />}
+      {pending && <Loader2 aria-hidden className="anim-fade size-4 animate-spin" />}
       {pending && pendingText ? pendingText : children}
     </button>
   );
@@ -44,7 +44,18 @@ export function SubmitButton({
  * The product photo is the card (teenage engineering): a plain plate, no border or shadow.
  * Store photos are shot on white, so the plate stays near-white even in dark mode.
  */
-export function ProductImage({ src, alt, className = "" }: { src: string | null; alt: string; className?: string }) {
+export function ProductImage({
+  src,
+  alt,
+  className = "",
+  zoom = false,
+}: {
+  src: string | null;
+  alt: string;
+  className?: string;
+  /** Ease the photo in a touch when an ancestor `.group` is hovered. */
+  zoom?: boolean;
+}) {
   const [failed, setFailed] = useState(false);
   return (
     <div className={`relative overflow-hidden bg-plate ${className}`}>
@@ -56,7 +67,9 @@ export function ProductImage({ src, alt, className = "" }: { src: string | null;
           loading="lazy"
           referrerPolicy="no-referrer"
           onError={() => setFailed(true)}
-          className="absolute inset-0 size-full object-contain p-[9%] mix-blend-multiply"
+          className={`absolute inset-0 size-full object-contain p-[9%] mix-blend-multiply ${
+            zoom ? "transition-transform duration-700 ease-(--ease-out) group-hover:scale-[1.045] motion-reduce:transition-none" : ""
+          }`}
         />
       ) : (
         <div className="absolute inset-0 grid place-items-center">
@@ -71,13 +84,13 @@ export function FormMessage({ state }: { state: { error?: string; message?: stri
   if (!state) return null;
   if (state.error)
     return (
-      <p role="alert" className="text-[14px] text-up">
+      <p key={state.error} role="alert" className="anim-rise text-[14px] text-up">
         {state.error}
       </p>
     );
   if (state.message)
     return (
-      <p role="status" className="text-[14px] text-down">
+      <p key={state.message} role="status" className="anim-rise text-[14px] text-down">
         {state.message}
       </p>
     );

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { notFound } from "next/navigation";
-import { ProductImage } from "@/components/client-ui";
-import { catalogueNo } from "@/components/ItemCard";
+import { catalogueNo, ItemPhoto } from "@/components/ItemCard";
 import {
   BuyForm,
   CompareButton,
@@ -12,6 +12,8 @@ import {
   RefreshButton,
   StatusButtons,
 } from "@/components/ItemForms";
+import { Odometer } from "@/components/motion";
+import { PageTransition } from "@/components/PageTransition";
 import { PriceChart } from "@/components/PriceChart";
 import { Delta, Notice, Section } from "@/components/ui";
 import * as actions from "@/lib/actions";
@@ -37,6 +39,17 @@ const VERDICT: Record<Verdict, { label: string; className: string }> = {
 
 const SOURCE_LABEL = { server: "Auto check", bookmarklet: "Bookmarklet", manual: "You", share: "Shared link" };
 const ROMAN = ["i", "ii", "iii", "iv", "v", "vi", "vii", "viii"];
+const ARROW = "inline-block transition-[translate,color] duration-300 ease-(--ease-out)";
+
+/** A disclosure label with a plus that turns into a cross when open. */
+function Summary({ children }: { children: string }) {
+  return (
+    <summary className="btn-text cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+      <Plus aria-hidden className="size-3.5 text-muted transition-transform duration-300 ease-(--ease-out) group-open:rotate-45" />
+      {children}
+    </summary>
+  );
+}
 
 export default async function ItemPage({ params, searchParams }: PageProps<"/item/[id]">) {
   const id = Number((await params).id);
@@ -60,9 +73,14 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
   const idx = () => String(++n).padStart(2, "0");
 
   return (
+    <PageTransition>
     <article>
-      <Link href="/wishlist" className="meta inline-flex min-h-11 items-center gap-2 transition-colors duration-200 hover:text-ink">
-        <span aria-hidden>←</span> Wishlist
+      <Link
+        href="/wishlist"
+        transitionTypes={["nav-back"]}
+        className="group meta inline-flex min-h-11 items-center gap-2 transition-colors duration-200 hover:text-ink"
+      >
+        <span aria-hidden className={`${ARROW} group-hover:-translate-x-1`}>←</span> Wishlist
       </Link>
 
       <div className="mt-4 space-y-3 empty:hidden">
@@ -85,7 +103,7 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
 
       {/* ---------- hero ---------- */}
       <div className="mt-6 grid gap-8 pb-10 md:grid-cols-2 md:gap-14 lg:gap-20">
-        <ProductImage src={item.image} alt={item.title} className="aspect-[4/3] w-full md:aspect-square" />
+        <ItemPhoto id={item.id} src={item.image} alt={item.title} className="aspect-[4/3] w-full md:aspect-square" />
         <div className="flex min-w-0 flex-col md:py-4">
           <p className="meta flex flex-wrap gap-x-3">
             <span>{catalogueNo(item.id)}</span>
@@ -107,7 +125,7 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
 
           <div className="mt-8 border-t border-rule pt-6">
             <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-              <span className="display tabular text-[52px] sm:text-[60px]">{inr(item.status === "bought" ? item.boughtPrice : item.currentPrice)}</span>
+              <Odometer text={inr(item.status === "bought" ? item.boughtPrice : item.currentPrice)} className="display text-[52px] sm:text-[60px]" />
               {wishing && <Delta from={prev} to={item.currentPrice} className="text-[14px]" />}
             </div>
             <p className="mt-2 text-[14px] text-muted">
@@ -129,8 +147,11 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             {wishing && <BuyForm action={actions.markBought.bind(null, id)} item={item} today={todayIST()} />}
-            <a href={item.url} target="_blank" rel="noopener noreferrer" className="btn-outline">
-              Open on {storeName(item.store)} <span aria-hidden>↗</span>
+            <a href={item.url} target="_blank" rel="noopener noreferrer" className="group btn-outline">
+              Open on {storeName(item.store)}{" "}
+              <span aria-hidden className={`${ARROW} group-hover:translate-x-0.5 group-hover:-translate-y-0.5`}>
+                ↗
+              </span>
             </a>
           </div>
           {wishing && (
@@ -181,8 +202,8 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
         )}
         <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto]">
           {points.length > 0 && (
-            <details>
-              <summary className="btn-text cursor-pointer">View as table</summary>
+            <details className="group">
+              <Summary>View as table</Summary>
               <table className="mt-3 w-full text-[14px]">
                 <thead>
                   <tr className="border-b border-rule text-left">
@@ -237,7 +258,7 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
                             <span className={`display tabular text-[20px] ${item.currentPrice != null && o.price < item.currentPrice ? "text-down" : ""}`}>
                               {inr(o.price)}
                             </span>
-                            <span aria-hidden className="text-muted transition-colors duration-200 group-hover:text-ink">↗</span>
+                            <span aria-hidden className={`${ARROW} text-muted group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink`}>↗</span>
                           </a>
                         </li>
                       ))}
@@ -259,7 +280,7 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
               <li key={l.id} className="border-b border-rule">
                 <a href={l.url} target="_blank" rel="noopener noreferrer" className="group flex min-h-12 items-center justify-between gap-4 text-[15px]">
                   Search {l.name}
-                  <span aria-hidden className="text-muted transition-colors duration-200 group-hover:text-ink">↗</span>
+                  <span aria-hidden className={`${ARROW} text-muted group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-ink`}>↗</span>
                 </a>
               </li>
             ))}
@@ -298,7 +319,7 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
       <Section index={idx()} title="Your notes">
         {item.notes && <p className="mb-6 max-w-2xl text-[15px] leading-relaxed whitespace-pre-line text-ink-2">{item.notes}</p>}
         <details className="group">
-          <summary className="btn-text cursor-pointer">Edit details and target price</summary>
+          <Summary>Edit details and target price</Summary>
           <div className="mt-6 max-w-2xl">
             <EditItemForm action={actions.updateItem.bind(null, id)} item={item} />
           </div>
@@ -313,5 +334,6 @@ export default async function ItemPage({ params, searchParams }: PageProps<"/ite
         </div>
       </Section>
     </article>
+    </PageTransition>
   );
 }

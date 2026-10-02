@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { inr } from "@/lib/format";
 import { storeName } from "@/lib/stores";
 import type { ItemSummary } from "@/lib/types";
@@ -7,6 +8,15 @@ import { Delta } from "./ui";
 
 export function catalogueNo(id: number) {
   return `No. ${String(id).padStart(3, "0")}`;
+}
+
+/** The product photo, named so it travels between its tile and the item page. */
+export function ItemPhoto({ id, src, alt, className, zoom }: { id: number; src: string | null; alt: string; className: string; zoom?: boolean }) {
+  return (
+    <ViewTransition name={`item-photo-${id}`} share="morph" default="none">
+      <ProductImage src={src} alt={alt} className={className} zoom={zoom} />
+    </ViewTransition>
+  );
 }
 
 /** Catalogue tile: plate, mono meta, name, price. No container, no badge soup. */
@@ -26,11 +36,11 @@ export function ItemCard({ item }: { item: ItemSummary }) {
             : null;
 
   return (
-    <Link href={`/item/${item.id}`} className="group block cursor-pointer">
-      <ProductImage src={item.image} alt="" className="aspect-[4/5] w-full transition-opacity duration-200 group-hover:opacity-90" />
+    <Link href={`/item/${item.id}`} transitionTypes={["nav-forward"]} className="group block cursor-pointer">
+      <ItemPhoto id={item.id} src={item.image} alt="" className="aspect-[4/5] w-full" zoom />
       <div className="pt-3">
         <p className="meta flex justify-between gap-2">
-          <span>{catalogueNo(item.id)}</span>
+          <span className="transition-colors duration-200 group-hover:text-ink">{catalogueNo(item.id)}</span>
           <span className="truncate">{storeName(item.store)}</span>
         </p>
         <h3 className="mt-1.5 line-clamp-2 text-[15px] leading-snug text-ink underline-offset-4 group-hover:underline">{item.title}</h3>

@@ -71,7 +71,7 @@ export function BuyForm({ action, item, today }: { action: BoundAction; item: It
       </button>
     );
   return (
-    <form onSubmit={onSubmit} className="w-full border-t border-rule pt-5">
+    <form onSubmit={onSubmit} className="anim-rise w-full border-t border-rule pt-5">
       <p className="meta mb-4 text-ink">Log the purchase</p>
       <div className="grid gap-4 sm:grid-cols-3">
         <div>

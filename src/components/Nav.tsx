@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { logout } from "@/lib/actions";
-import { Logo } from "./Logo";
+import { Logo, swingTag } from "./Logo";
 import { ThemeToggle } from "./ThemeToggle";
 
 const LINKS = [
@@ -22,9 +22,16 @@ function isActive(pathname: string, href: string) {
 export function TopNav({ showLogout }: { showLogout: boolean }) {
   const pathname = usePathname();
   return (
-    <header className="sticky top-0 z-20 border-b border-rule bg-bg/90 backdrop-blur-md">
+    <header className="site-header sticky top-0 z-20 border-b border-rule bg-bg/90 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:h-16 sm:px-8">
-        <Link href="/" className="flex shrink-0 items-center gap-2" aria-label="WishList home">
+        <Link
+          href="/"
+          transitionTypes={["nav-section"]}
+          className="flex shrink-0 items-center gap-2"
+          aria-label="WishList home"
+          onPointerEnter={(e) => swingTag(e.currentTarget)}
+          onFocus={(e) => swingTag(e.currentTarget)}
+        >
           <Logo className="size-6" />
           <span className="display hidden text-[22px] sm:inline">WishList</span>
         </Link>
@@ -35,13 +42,21 @@ export function TopNav({ showLogout }: { showLogout: boolean }) {
               <Link
                 key={href}
                 href={href}
+                transitionTypes={["nav-section"]}
                 aria-current={active ? "page" : undefined}
-                className={`relative flex h-14 items-center text-[14px] transition-colors duration-200 sm:h-16 sm:text-[15px] ${
+                className={`group relative flex h-14 items-center text-[14px] transition-colors duration-200 sm:h-16 sm:text-[15px] ${
                   active ? "text-ink" : "text-muted hover:text-ink"
                 }`}
               >
                 {label}
-                {active && <span aria-hidden className="absolute inset-x-0 bottom-0 h-[2px] bg-ink" />}
+                {active ? (
+                  <span aria-hidden className="vt-ink absolute inset-x-0 bottom-0 h-[2px] bg-ink" style={{ viewTransitionName: "nav-ink" }} />
+                ) : (
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-rule-strong transition-transform duration-300 ease-(--ease-out) group-hover:scale-x-100"
+                  />
+                )}
               </Link>
             );
           })}

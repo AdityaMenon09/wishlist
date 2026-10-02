@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AddItemForm } from "@/components/AddItemForm";
-import { ItemCard } from "@/components/ItemCard";
-import { Empty, PageHeader } from "@/components/ui";
+import { PageTransition } from "@/components/PageTransition";
+import { PageHeader } from "@/components/ui";
+import { WishlistGrid } from "@/components/WishlistGrid";
 import { inr } from "@/lib/format";
 import { listItems } from "@/lib/repo";
 import type { ItemStatus } from "@/lib/types";
@@ -15,6 +16,12 @@ const TABS: { id: ItemStatus; label: string }[] = [
   { id: "archived", label: "Archived" },
 ];
 
+const EMPTY: Record<ItemStatus, [string, string]> = {
+  wishlist: ["Nothing wanted yet.", "Paste a link above. WishList reads the product, starts a price history, and tells you whether to buy or wait."],
+  bought: ["Nothing bought yet.", "Mark something as bought and it lands here, and in Spending."],
+  archived: ["Nothing archived yet.", "Archived items keep their history but stop getting checked."],
+};
+
 export default async function WishlistPage({ searchParams }: PageProps<"/wishlist">) {
   const { tab } = await searchParams;
   const active = TABS.find((t) => t.id === tab)?.id ?? "wishlist";
@@ -24,7 +31,7 @@ export default async function WishlistPage({ searchParams }: PageProps<"/wishlis
   const total = items.reduce((s, i) => s + ((active === "bought" ? i.boughtPrice : i.currentPrice) ?? 0), 0);
 
   return (
-    <>
+    <PageTransition>
       <PageHeader
         kicker={items.length ? `${items.length} item${items.length === 1 ? "" : "s"} · ${inr(total)} ${active === "bought" ? "spent" : "in total"}` : "The catalogue"}
         title="Wishlist"
@@ -37,36 +44,34 @@ export default async function WishlistPage({ searchParams }: PageProps<"/wishlis
       </div>
 
       <nav aria-label="Filter" className="mt-12 flex gap-6 border-b border-rule">
-        {TABS.map((t) => (
-          <Link
-            key={t.id}
-            href={t.id === "wishlist" ? "/wishlist" : `/wishlist?tab=${t.id}`}
-            aria-current={t.id === active ? "page" : undefined}
-            className={`relative -mb-px flex min-h-11 items-center gap-2 border-b-2 text-[15px] transition-colors duration-200 ${
-              t.id === active ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink"
-            }`}
-          >
-            {t.label}
-            <span className="tabular font-mono text-[12px] text-muted">{counts[t.id]}</span>
-          </Link>
-        ))}
+        {TABS.map((t) => {
+          const on = t.id === active;
+          return (
+            <Link
+              key={t.id}
+              href={t.id === "wishlist" ? "/wishlist" : `/wishlist?tab=${t.id}`}
+              scroll={false}
+              aria-current={on ? "page" : undefined}
+              className={`group relative -mb-px flex min-h-11 items-center gap-2 text-[15px] transition-colors duration-200 ${
+                on ? "text-ink" : "text-muted hover:text-ink"
+              }`}
+            >
+              {t.label}
+              <span className="tabular font-mono text-[12px] text-muted">{counts[t.id]}</span>
+              {on ? (
+                <span aria-hidden className="vt-ink absolute inset-x-0 bottom-0 h-[2px] bg-ink" style={{ viewTransitionName: "tab-ink" }} />
+              ) : (
+                <span
+                  aria-hidden
+                  className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-rule-strong transition-transform duration-300 ease-(--ease-out) group-hover:scale-x-100"
+                />
+              )}
+            </Link>
+          );
+        })}
       </nav>
 
-      {items.length === 0 ? (
-        <Empty title={active === "wishlist" ? "Nothing wanted yet." : `Nothing ${active} yet.`}>
-          {active === "wishlist"
-            ? "Paste a link above. WishList reads the product, starts a price history, and tells you whether to buy or wait."
-            : active === "bought"
-              ? "Mark something as bought and it lands here, and in Spending."
-              : "Archived items keep their history but stop getting checked."}
-        </Empty>
-      ) : (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-10 pt-8 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4">
-          {items.map((item) => (
-            <ItemCard key={item.id} item={item} />
-          ))}
-        </div>
-      )}
-    </>
+      <WishlistGrid key={active} items={items} emptyTitle={EMPTY[active][0]} emptyText={EMPTY[active][1]} />
+    </PageTransition>
   );
 }

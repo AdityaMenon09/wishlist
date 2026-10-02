@@ -19,8 +19,9 @@ export const viewport: Viewport = {
   ],
 };
 
-// Applies a saved theme choice before paint. No choice saved = follow the system.
-const themeScript = `try{var t=localStorage.getItem("wl-theme");if(t)document.documentElement.dataset.theme=t}catch(e){}`;
+// Applies a saved theme choice before paint (no choice saved = follow the system), and flags
+// the first paint so entrance choreography runs on a fresh load but not on client navigations.
+const themeScript = `(function(d){try{var t=localStorage.getItem("wl-theme");if(t)d.dataset.theme=t}catch(e){}d.dataset.boot="";setTimeout(function(){delete d.dataset.boot},1500)})(document.documentElement)`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

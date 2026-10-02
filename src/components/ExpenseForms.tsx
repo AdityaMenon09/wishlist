@@ -73,7 +73,7 @@ export function ExpenseRow({ e, today }: { e: Expense; today: string }) {
 
   if (editing)
     return (
-      <li className="border-b border-rule py-5">
+      <li className="anim-rise border-b border-rule py-5">
         <form onSubmit={edit.onSubmit} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-8">
           <Fields e={e} today={today} idPrefix={`e${e.id}`} />
           <div className="flex flex-wrap items-center gap-4 sm:col-span-2 lg:col-span-8">
@@ -90,7 +90,9 @@ export function ExpenseRow({ e, today }: { e: Expense; today: string }) {
     );
 
   return (
-    <li className={`group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-b border-rule py-3 ${pending ? "opacity-40" : ""}`}>
+    <li
+      className={`group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 border-b border-rule py-3 transition-opacity duration-200 ${pending ? "opacity-40" : ""}`}
+    >
       <div className="min-w-0">
         <p className="truncate text-[15px]">{e.title}</p>
         <p className="truncate text-[13px] text-muted">

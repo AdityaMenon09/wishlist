@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
+import { Logo } from "./Logo";
 import { inr } from "@/lib/format";
 
 /** Big editorial page title. `kicker` is the small mono line above it. */
@@ -16,9 +17,15 @@ export function PageHeader({
   return (
     <header className="mb-10 flex flex-wrap items-end justify-between gap-x-8 gap-y-5 sm:mb-14">
       <div className="min-w-0 max-w-3xl">
-        {kicker && <p className="meta mb-3">{kicker}</p>}
-        <h1 className="display text-[40px] sm:text-[56px]">{title}</h1>
-        {children && <div className="mt-4 max-w-2xl text-[17px] leading-relaxed text-ink-2">{children}</div>}
+        {kicker && <div className="meta boot-rise mb-3">{kicker}</div>}
+        <h1 className="display boot-rise text-[40px] sm:text-[56px]" style={{ "--i": 1 } as CSSProperties}>
+          {title}
+        </h1>
+        {children && (
+          <div className="boot-rise mt-4 max-w-2xl text-[17px] leading-relaxed text-ink-2" style={{ "--i": 3 } as CSSProperties}>
+            {children}
+          </div>
+        )}
       </div>
       {action}
     </header>
@@ -105,15 +112,19 @@ export function Notice({ tone = "info", children }: { tone?: "info" | "warn" | "
     success: "border-down bg-down-soft",
   }[tone];
   return (
-    <div role={tone === "warn" ? "alert" : "status"} className={`border-l-2 px-4 py-3 text-[14px] leading-relaxed ${styles}`}>
+    <div role={tone === "warn" ? "alert" : "status"} className={`reveal-wipe border-l-2 px-4 py-3 text-[14px] leading-relaxed ${styles}`}>
       {children}
     </div>
   );
 }
 
+/** Empty state: a blank tag hangs and swings, waiting for something to be priced. */
 export function Empty({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <div className="border-t border-rule py-16 text-center sm:py-24">
+    <div className="anim-fade border-t border-rule py-16 text-center sm:py-24">
+      <span className="logo-swing-once mb-6 inline-block">
+        <Logo className="size-10" />
+      </span>
       <p className="display text-[28px] sm:text-[32px]">{title}</p>
       {children && <div className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-ink-2">{children}</div>}
     </div>

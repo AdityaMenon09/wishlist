@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import type { ReactNode } from "react";
 import { BookmarkletLink } from "@/components/BookmarkletLink";
+import { PageTransition } from "@/components/PageTransition";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PageHeader, Section } from "@/components/ui";
 import { logout } from "@/lib/actions";
@@ -45,7 +46,7 @@ export default async function SetupPage() {
   };
 
   return (
-    <>
+    <PageTransition>
       <PageHeader kicker="Setup" title="Capture from anywhere.">
         Amazon and Flipkart often block servers from reading their pages. These run from <em>your</em> browser or phone instead.
       </PageHeader>
@@ -128,6 +129,6 @@ export default async function SetupPage() {
           )}
         </div>
       </Section>
-    </>
+    </PageTransition>
   );
 }

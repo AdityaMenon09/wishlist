@@ -1,10 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Area, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, ComposedChart, Line, ReferenceDot, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { inr, inrShort } from "@/lib/format";
 import type { ProjectionPoint } from "@/lib/outlook";
+import { useInView, useReducedMotion } from "./motion";
 import { useThemeColors } from "./useThemeColors";
+
+// The history line draws itself left to right like a plotter pen, then the projection carries on.
+const DRAW = 1100;
 
 type Point = { t: number; price?: number; mid?: number; band?: [number, number] };
 
@@ -24,6 +28,9 @@ export function PriceChart({
 }) {
   const c = useThemeColors();
   const [showProjection, setShowProjection] = useState(true);
+  const [frame, seen] = useInView<HTMLDivElement>(0.35);
+  const animate = !useReducedMotion();
+  const last = history.at(-1);
 
   const data = useMemo<Point[]>(() => {
     const h = history.map((p) => ({ t: Date.parse(p.t), price: p.price }));
@@ -69,7 +76,8 @@ export function PriceChart({
           </button>
         )}
       </div>
-      <div className="h-60 sm:h-72" role="img" aria-label="Price history chart. A table version is below.">
+      <div ref={frame} className="h-60 sm:h-72" role="img" aria-label="Price history chart. A table version is below.">
+        {seen && (
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
             <XAxis
@@ -113,7 +121,18 @@ export function PriceChart({
                 );
               }}
             />
-            {showProjection && <Area dataKey="band" stroke="none" fill={c.forecast} fillOpacity={0.1} isAnimationActive={false} />}
+            {showProjection && (
+              <Area
+                dataKey="band"
+                stroke="none"
+                fill={c.forecast}
+                fillOpacity={0.1}
+                isAnimationActive={animate}
+                animationBegin={DRAW - 200}
+                animationDuration={900}
+                animationEasing="ease-out"
+              />
+            )}
             <Area
               dataKey="price"
               type="stepAfter"
@@ -123,15 +142,42 @@ export function PriceChart({
               fillOpacity={0.025}
               dot={false}
               activeDot={{ r: 3.5, fill: c.chart, strokeWidth: 0 }}
-              isAnimationActive={false}
+              isAnimationActive={animate}
+              animationBegin={150}
+              animationDuration={DRAW}
+              animationEasing="ease-out"
               connectNulls
             />
             {showProjection && (
-              <Line dataKey="mid" stroke={c.forecast} strokeWidth={1.75} strokeDasharray="5 4" dot={false} isAnimationActive={false} />
+              <Line
+                dataKey="mid"
+                stroke={c.forecast}
+                strokeWidth={1.75}
+                strokeDasharray="5 4"
+                dot={false}
+                isAnimationActive={animate}
+                animationBegin={DRAW - 100}
+                animationDuration={800}
+                animationEasing="ease-out"
+              />
             )}
             {target != null && <ReferenceLine y={target} stroke={c.down} strokeDasharray="1 4" strokeWidth={1.5} ifOverflow="extendDomain" />}
+            {last && (
+              <ReferenceDot
+                x={Date.parse(last.t)}
+                y={last.price}
+                ifOverflow="visible"
+                shape={(p: { cx?: number; cy?: number }) => (
+                  <g className="chart-now" style={{ animationDelay: `${animate ? DRAW + 100 : 0}ms` }}>
+                    <circle cx={p.cx} cy={p.cy} r={3.5} fill={c.chart} />
+                    {animate && <circle cx={p.cx} cy={p.cy} r={3.5} fill="none" stroke={c.chart} strokeWidth={1} className="chart-ping" style={{ animationDelay: `${DRAW + 250}ms` }} />}
+                  </g>
+                )}
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 "use client";
 
+import { Check } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 /**
@@ -15,7 +16,12 @@ export function BookmarkletLink({ href }: { href: string }) {
 
   return (
     <div className="flex flex-wrap items-center gap-4">
-      <a ref={ref} onClick={(e) => e.preventDefault()} className="btn-primary cursor-grab active:cursor-grabbing" title="Drag me to your bookmarks bar">
+      <a
+        ref={ref}
+        onClick={(e) => e.preventDefault()}
+        className="btn-primary cursor-grab transition-[rotate,opacity,scale] duration-300 ease-(--ease-out) hover:-rotate-3 active:cursor-grabbing motion-reduce:hover:rotate-0"
+        title="Drag me to your bookmarks bar"
+      >
         + WishList
       </a>
       <span className="meta">← drag to bookmarks bar</span>
@@ -32,7 +38,13 @@ export function BookmarkletLink({ href }: { href: string }) {
           }
         }}
       >
-        {copied ? "Copied" : "Copy code"}
+        {copied ? (
+          <span key="done" className="anim-rise inline-flex items-center gap-1.5 text-down">
+            <Check aria-hidden className="size-4" /> Copied
+          </span>
+        ) : (
+          "Copy code"
+        )}
       </button>
     </div>
   );

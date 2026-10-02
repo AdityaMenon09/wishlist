@@ -128,7 +128,7 @@ body {
 }
 
 @utility btn {
-  @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-[background-color,border-color,opacity] duration-200 disabled:cursor-not-allowed disabled:opacity-50;
+  @apply inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full px-5 text-[15px] font-medium whitespace-nowrap transition-[background-color,border-color,opacity,scale] duration-200 active:scale-[0.97] active:duration-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100;
 }
 @utility btn-primary {
   @apply btn bg-ink text-bg hover:opacity-85;
@@ -160,11 +160,392 @@ textarea:focus-visible {
   outline: none;
 }
 
+html {
+  scrollbar-color: var(--rule-strong) transparent;
+  interpolate-size: allow-keywords;
+}
+input,
+textarea {
+  caret-color: var(--accent);
+}
+
+/* ==========================================================================
+ * Motion. The catalogue moves like paper and ink: prices roll in on number
+ * wheels, rules draw, sheets slide. Exponential ease-out, nothing bounces.
+ * Every keyframe below starts from a state the page could rest in, and movement
+ * distances are variables so reduced motion can keep the fade and drop the travel.
+ * ========================================================================== */
+:root {
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --rise: 10px;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 var(--rise);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes wipe {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+}
+@keyframes grow-x {
+  from {
+    scale: 0 1;
+  }
+}
+@keyframes grow-y {
+  from {
+    scale: 1 0;
+  }
+}
+@keyframes ping {
+  0% {
+    opacity: 0.55;
+    scale: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 3.2;
+  }
+}
+@keyframes scan {
+  from {
+    translate: -100% 0;
+  }
+  to {
+    translate: 340% 0;
+  }
+}
+/* A hanging price tag, let go: a damped swing about its eyelet. */
+@keyframes swing {
+  0% {
+    rotate: 0deg;
+  }
+  18% {
+    rotate: 16deg;
+  }
+  38% {
+    rotate: -10deg;
+  }
+  56% {
+    rotate: 6deg;
+  }
+  72% {
+    rotate: -3deg;
+  }
+  86% {
+    rotate: 1.2deg;
+  }
+  100% {
+    rotate: 0deg;
+  }
+}
+
+/* First paint only (html[data-boot] is set by the head script and removed after ~1.4s),
+ * so client navigations rely on view transitions instead of replaying entrances. */
+[data-boot] .boot-rise {
+  animation: rise 640ms var(--ease-out) both;
+  animation-delay: calc(min(var(--i, 0), 9) * 55ms);
+}
+
+.reveal-wipe {
+  animation: wipe 760ms var(--ease-out) 220ms both;
+}
+.anim-rise {
+  animation: rise 420ms var(--ease-out) both;
+}
+.anim-fade {
+  animation: fade 260ms var(--ease-out) both;
+}
+
+/* Bars and rules that draw themselves once their block scrolls into view (see <Reveal>). */
+.bar-grow {
+  transform-origin: left center;
+  animation: grow-x 900ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 120ms);
+}
+.bar-rise {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: grow-y 820ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 65ms + 80ms);
+}
+[data-shown="false"] .bar-grow,
+[data-shown="false"] .bar-rise {
+  animation-play-state: paused;
+}
+
+/* Today's price on the history chart: the dot lands after the line, then rings once. */
+.chart-now {
+  animation: fade 300ms var(--ease-out) both;
+}
+.chart-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ping 1100ms var(--ease-out) both;
+}
+
+/* --- Odometer: each digit is a strip of 0–9 twice, parked on the second set. --- */
+.odo {
+  display: inline-block;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.odo-col {
+  display: inline-block;
+  height: 1lh;
+  overflow: hidden;
+  vertical-align: top;
+}
+.odo-strip {
+  display: flex;
+  flex-direction: column;
+  transform: translateY(calc((10 + var(--d)) * -5%));
+  animation: odo-roll calc(720ms + var(--n, 0) * 90ms) var(--ease-out) backwards;
+}
+.odo-strip > span {
+  display: block;
+  height: 1lh;
+}
+@keyframes odo-roll {
+  0% {
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  35% {
+    filter: blur(0.8px);
+  }
+  100% {
+    filter: blur(0);
+  }
+}
+
+/* --- Logo tag --- */
+.logo-tag {
+  transform-box: view-box;
+  transform-origin: 10.5px 10.5px;
+}
+.logo-swing-once .logo-tag {
+  animation: swing 1400ms var(--ease-out) 300ms both;
+}
+
+/* --- Pending scan: an accent hairline sweeping under a field while the server reads a page. --- */
+.scan-line {
+  position: absolute;
+  inset: auto 1.25rem 0;
+  height: 1.5px;
+  overflow: hidden;
+}
+.scan-line::after {
+  content: "";
+  display: block;
+  width: 30%;
+  height: 100%;
+  background: var(--accent);
+  animation: scan 1150ms var(--ease-in-out) infinite;
+}
+
+/* --- Disclosure: <details> open and close by height, where supported. --- */
+details::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 420ms var(--ease-out),
+    content-visibility 420ms allow-discrete;
+}
+details[open]::details-content {
+  block-size: auto;
+}
+
+/* ==========================================================================
+ * View transitions (React <ViewTransition> + Link transitionTypes).
+ * ========================================================================== */
+::view-transition {
+  pointer-events: none;
+}
+
+/* The header is the fixed reference while pages move under it. */
+.site-header {
+  view-transition-name: site-header;
+}
+::view-transition-group(site-header) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+/* Active-state rules (nav, tabs, sort) slide from option to option. Each sets its own name inline. */
+.vt-ink {
+  view-transition-class: ink;
+}
+::view-transition-group(.ink) {
+  animation-duration: 460ms;
+  animation-timing-function: var(--ease-out);
+  z-index: 101;
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    translate: var(--vt-x, 0) var(--vt-y, 0);
+  }
+}
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    translate: var(--vt-x, 0) var(--vt-y, 0);
+  }
+}
+
+/* Going deeper (list → item) and coming back. */
+::view-transition-old(.vt-forward) {
+  --vt-x: -40px;
+  animation: vt-out 200ms var(--ease-in) both;
+}
+::view-transition-new(.vt-forward) {
+  --vt-x: 56px;
+  animation: vt-in 460ms var(--ease-out) 90ms both;
+}
+::view-transition-old(.vt-back) {
+  --vt-x: 40px;
+  animation: vt-out 200ms var(--ease-in) both;
+}
+::view-transition-new(.vt-back) {
+  --vt-x: -56px;
+  animation: vt-in 460ms var(--ease-out) 90ms both;
+}
+/* Switching sections from the top nav: a quick lift, no direction. */
+::view-transition-old(.vt-section) {
+  animation: vt-out 140ms var(--ease-in) both;
+}
+::view-transition-new(.vt-section) {
+  --vt-y: 14px;
+  animation: vt-in 420ms var(--ease-out) 60ms both;
+}
+/* Paging through months in the ledger. */
+::view-transition-old(.vt-month-next) {
+  --vt-x: -32px;
+  animation: vt-out 180ms var(--ease-in) both;
+}
+::view-transition-new(.vt-month-next) {
+  --vt-x: 40px;
+  animation: vt-in 420ms var(--ease-out) 60ms both;
+}
+::view-transition-old(.vt-month-prev) {
+  --vt-x: 32px;
+  animation: vt-out 180ms var(--ease-in) both;
+}
+::view-transition-new(.vt-month-prev) {
+  --vt-x: -40px;
+  animation: vt-in 420ms var(--ease-out) 60ms both;
+}
+
+/* The product photo travels from its tile to the item page and back. */
+::view-transition-group(.morph) {
+  animation-duration: 520ms;
+  animation-timing-function: var(--ease-out);
+}
+::view-transition-old(.morph),
+::view-transition-new(.morph) {
+  block-size: 100%;
+  object-fit: cover;
+}
+::view-transition-image-pair(.morph) {
+  animation: morph-soften 520ms var(--ease-out);
+}
+@keyframes morph-soften {
+  35% {
+    filter: blur(2px);
+  }
+}
+
+/* Catalogue tiles: re-sorting glides them, filtering lets them leave and arrive. */
+::view-transition-group(.tile-move) {
+  animation-duration: 560ms;
+  animation-timing-function: var(--ease-out);
+}
+::view-transition-old(.tile-out) {
+  --vt-y: 6px;
+  animation: vt-out 160ms var(--ease-in) both;
+}
+::view-transition-new(.tile-in) {
+  --vt-y: 14px;
+  animation: vt-in 440ms var(--ease-out) 120ms both;
+}
+/* Ledger rows. */
+::view-transition-group(.row-move) {
+  animation-duration: 420ms;
+  animation-timing-function: var(--ease-out);
+}
+::view-transition-old(.row-out) {
+  --vt-x: 24px;
+  animation: vt-out 200ms var(--ease-in) both;
+}
+::view-transition-new(.row-in) {
+  --vt-y: -8px;
+  animation: vt-in 480ms var(--ease-out) 100ms both;
+}
+
+/* Theme switch: the new theme opens out from the toggle like ink spreading into paper. */
+:root[data-vt="theme"] .site-header,
+:root[data-vt="theme"] .vt-ink {
+  view-transition-name: none !important;
+}
+:root[data-vt="theme"]::view-transition-old(root) {
+  animation: none;
+}
+:root[data-vt="theme"]::view-transition-new(root) {
+  animation: theme-reveal 700ms var(--ease-in-out);
+}
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--vt-cx, 100%) var(--vt-cy, 0));
+  }
+  to {
+    clip-path: circle(var(--vt-r, 150vmax) at var(--vt-cx, 100%) var(--vt-cy, 0));
+  }
+}
+
+/* Reduced motion: keep fades and state changes, drop travel, wheels and swings. */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
+  :root {
+    --rise: 0px;
+  }
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    --vt-x: 0px !important;
+    --vt-y: 0px !important;
+  }
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+  }
+  :root[data-vt="theme"]::view-transition-new(root) {
+    animation: fade 300ms ease both;
+  }
+  .odo-strip,
+  .logo-tag,
+  .bar-grow,
+  .bar-rise,
+  .chart-ping,
+  .reveal-wipe {
+    animation: none !important;
+  }
+  .scan-line::after {
+    width: 100%;
+    animation: fade 900ms ease-in-out infinite alternate;
   }
 }
